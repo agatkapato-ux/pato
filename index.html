@@ -1,13 +1,17 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Focus Board</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap">
 <style>
-/* Layout: slim top bar with a Board / Notes switch. Board is a 2x2 priority matrix.
-   Notes are three panes (folders, note list, editor) that collapse to one pane on phones. */
+/* Layout: slim top bar (title, sync dot, small account button, Board / Notes switch).
+   Board is a 2x2 priority matrix. Notes open on the recent-notes list; on phones the list has
+   a bottom bar with New note and Folders, and folders / editor are separate full-screen panes. */
 :root{
   --bg:#edf0f3; --surface:#ffffff; --surface-2:#f3f5f8; --ink:#18212a; --muted:#5d6977; --line:#d8dee5;
-  --accent:#17666f; --accent-ink:#ffffff; --accent-soft:#d6eaec;
+  --accent:#8a3f6e; --accent-ink:#ffffff; --accent-soft:#f0dde8;
   --q-do:#b8422f; --q-do-soft:#f8e1dc;
   --q-sch:#2a64ad; --q-sch-soft:#dbe7f6;
   --q-del:#946110; --q-del-soft:#f5e9d0;
@@ -18,11 +22,12 @@
   --font-display:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;
   --font-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --radius:14px;
+  color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#0f1418; --surface:#171e25; --surface-2:#1e2730; --ink:#e7ecf1; --muted:#8f9ca9; --line:#2a3540;
-    --accent:#5cb8c2; --accent-ink:#07191c; --accent-soft:#1b3a3f;
+    --accent:#d08ab5; --accent-ink:#2a0f20; --accent-soft:#3a1f30;
     --q-do:#ef8a78; --q-do-soft:#3a201b;
     --q-sch:#7fb0ee; --q-sch-soft:#1b2b40;
     --q-del:#e0ae5c; --q-del-soft:#3a2d15;
@@ -34,7 +39,7 @@
 }
 :root[data-theme="dark"]{
   --bg:#0f1418; --surface:#171e25; --surface-2:#1e2730; --ink:#e7ecf1; --muted:#8f9ca9; --line:#2a3540;
-  --accent:#5cb8c2; --accent-ink:#07191c; --accent-soft:#1b3a3f;
+  --accent:#d08ab5; --accent-ink:#2a0f20; --accent-soft:#3a1f30;
   --q-do:#ef8a78; --q-do-soft:#3a201b;
   --q-sch:#7fb0ee; --q-sch-soft:#1b2b40;
   --q-del:#e0ae5c; --q-del-soft:#3a2d15;
@@ -48,6 +53,8 @@ html,body{height:100%}
 body{
   margin:0; background:var(--bg); color:var(--ink);
   font:15px/1.45 var(--font-body);
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
   padding-left:max(16px,env(safe-area-inset-left,0px));
   padding-right:max(16px,env(safe-area-inset-right,0px));
   overflow:hidden;
@@ -60,33 +67,19 @@ button{font:inherit;color:inherit}
 .app{height:100%;min-height:520px;max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:12px;padding-block:12px}
 
 /* top bar */
-.top{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;flex:none}
-.top h1{font:700 22px/1 var(--font-display);letter-spacing:-.01em;margin:0 auto 0 0}
-.tabs{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px}
-.tabs button{border:0;background:none;padding:7px 18px;border-radius:999px;font-weight:600;color:var(--muted);cursor:pointer}
+.top{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;flex:none}
+.tabs{order:-1;flex:1;max-width:300px;display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px}
+.tabs button{flex:1;border:0;background:none;padding:7px 18px;border-radius:999px;font-weight:600;color:var(--muted);cursor:pointer}
 .tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,30,40,.12)}
-.sync{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.sync{margin-left:auto;display:flex;align-items:center;padding:6px}
 .sync::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--muted)}
 .sync[data-s="ok"]::before{background:var(--ok)}
 .sync[data-s="busy"]::before,.sync[data-s="local"]::before{background:var(--warn)}
 .sync[data-s="err"]::before{background:var(--danger)}
+.avatar{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:13px;display:inline-grid;place-items:center;cursor:pointer;padding:0;flex:none}
+.avatar:hover{border-color:var(--accent)}
 .banner{flex:none;background:var(--q-del-soft);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:13px}
-@media(max-width:560px){
-  .tabs{order:3;width:100%}
-  .tabs button{flex:1}
-}
-
 .view{flex:1;min-height:0}
-
-/* account and cloud sync */
-.authbar{flex:none;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
-.auth-form,.auth-signed-in{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.auth-form strong{font-size:13px;margin-right:auto}
-.auth-form input{width:min(220px,100%);padding:7px 10px;font-size:13px}
-.auth-message{margin:5px 0 0;color:var(--muted);font-size:12px}
-.auth-message:empty{display:none}
-.auth-signed-in span{font-size:13px;color:var(--muted);margin-right:auto}
-@media(max-width:650px){.auth-form input{width:100%;flex:1 1 100%}.auth-form strong{width:100%}}
 
 /* buttons and fields */
 .btn{font-weight:600;border-radius:10px;padding:9px 14px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:inline-flex;align-items:center;gap:6px;justify-content:center}
@@ -111,7 +104,8 @@ label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:60
 .quick input{flex:1}
 .quick select{width:auto;flex:none}
 @media(max-width:560px){.quick{flex-wrap:wrap}.quick input{flex-basis:100%}.quick select{flex:1}}
-.matrix{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(200px,1fr);gap:12px;flex:1 0 auto}
+.matrix{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:minmax(110px,auto);grid-auto-rows:minmax(200px,1fr);gap:12px;flex:1 0 auto}
+.quad[data-q="today"]{--qc:var(--accent);--qs:var(--accent-soft);grid-column:1/-1}
 @media(max-width:700px){.matrix{grid-template-columns:minmax(0,1fr);grid-auto-rows:minmax(150px,auto)}}
 .quad{--qc:var(--q-do);--qs:var(--q-do-soft);background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .quad[data-q="schedule"]{--qc:var(--q-sch);--qs:var(--q-sch-soft)}
@@ -166,6 +160,9 @@ label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:60
 .n-date{flex:none;font-variant-numeric:tabular-nums}
 .n-prev{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .n-folder{font-size:12px;color:var(--accent);display:flex;gap:4px;align-items:center}
+.list-foot{display:none;gap:8px;padding:10px 12px;border-top:1px solid var(--line);flex:none}
+.list-foot .btn{padding:12px 16px}
+.list-foot .primary{flex:1}
 .ed-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap;flex:none}
 .ed-bar select{width:auto;max-width:200px;padding:7px 10px}
 .ed-bar .grow{margin-left:auto}
@@ -182,6 +179,8 @@ label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:60
   .notes[data-pane="editor"] #pane-folders,.notes[data-pane="editor"] #pane-list{display:none}
   .back{display:inline-flex}
   .ed-empty{display:none}
+  .list-foot{display:flex}
+  #new-note{display:none}
 }
 
 /* sheet */
@@ -192,7 +191,7 @@ label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:60
 .sheet form{display:flex;flex-direction:column;gap:14px}
 .sheet .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .sheet .row .spacer{flex:1}
-.sheet .note{font-size:13px;color:var(--muted);margin:0}
+.sheet .note{font-size:13px;color:var(--muted);margin:0;overflow-wrap:anywhere}
 .err{color:var(--danger);font-size:13px;min-height:0}
 .quad-pick{display:grid;grid-template-columns:1fr 1fr;gap:8px;border:0;padding:0;margin:0;min-width:0}
 .quad-pick legend{font-size:13px;font-weight:600;color:var(--muted);padding:0;margin-bottom:6px}
@@ -203,36 +202,25 @@ label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:60
 .qp small{color:var(--muted);font-size:12px}
 .qp input:checked + span{border-color:var(--c);background:var(--s);box-shadow:inset 0 0 0 1px var(--c)}
 .qp input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.qp[data-q="today"]{--c:var(--accent);--s:var(--accent-soft);grid-column:1/-1}
 .qp[data-q="do"]{--c:var(--q-do);--s:var(--q-do-soft)}
 .qp[data-q="schedule"]{--c:var(--q-sch);--s:var(--q-sch-soft)}
 .qp[data-q="delegate"]{--c:var(--q-del);--s:var(--q-del-soft)}
 .qp[data-q="eliminate"]{--c:var(--q-no);--s:var(--q-no-soft)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
+</head>
+<body>
 
 <div class="app">
   <header class="top">
-    <h1>Focus Board</h1>
     <div class="sync" id="sync" data-s="wait" role="status">Connecting…</div>
+    <button type="button" id="acct" class="btn small" hidden>Sign in</button>
     <nav class="tabs" role="tablist" aria-label="Sections">
       <button type="button" role="tab" id="tab-board" data-view="board" aria-selected="true">Board</button>
       <button type="button" role="tab" id="tab-notes" data-view="notes" aria-selected="false">Notes</button>
     </nav>
   </header>
-  <section class="authbar" id="authbar" aria-label="Cloud sync account">
-    <form id="auth-form" class="auth-form">
-      <strong id="auth-heading">Sign in to sync across devices</strong>
-      <input id="auth-email" type="email" autocomplete="email" placeholder="Email address" aria-label="Email address" required>
-      <input id="auth-password" type="password" autocomplete="current-password" placeholder="Password (at least 6 characters)" aria-label="Password" minlength="6" required>
-      <button class="btn primary small" id="auth-submit" type="submit">Sign in</button>
-      <button class="btn small" id="auth-toggle" type="button">Create account</button>
-    </form>
-    <div id="auth-signed-in" class="auth-signed-in" hidden>
-      <span id="auth-email-label"></span>
-      <button class="btn small" id="auth-signout" type="button">Sign out</button>
-    </div>
-    <p class="auth-message" id="auth-message" role="status"></p>
-  </section>
   <div class="banner" id="banner" role="status" hidden></div>
 
   <section class="view board" id="view-board" aria-labelledby="tab-board">
@@ -248,22 +236,26 @@ label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:60
     </div>
   </section>
 
-  <section class="view notes" id="view-notes" data-pane="folders" aria-labelledby="tab-notes" hidden>
+  <section class="view notes" id="view-notes" data-pane="list" aria-labelledby="tab-notes" hidden>
     <aside class="pane" id="pane-folders" aria-label="Folders">
       <div class="pane-head">
+        <button class="back" id="back-notes" type="button" aria-label="Back to notes"></button>
         <h2>Folders</h2>
-        <button class="icon-btn" id="new-folder" type="button" aria-label="New folder" disabled></button>
+        <button class="btn small" id="new-folder" type="button" disabled></button>
       </div>
       <div class="scroll"><ul class="folder-list" id="folder-list"></ul></div>
     </aside>
     <section class="pane" id="pane-list" aria-label="Notes">
       <div class="pane-head">
-        <button class="back" id="back-folders" type="button" aria-label="Back to folders"></button>
         <h2 id="list-title">All notes</h2>
         <button class="btn primary small" id="new-note" type="button" disabled>New note</button>
       </div>
       <div class="search"><input id="search" type="search" placeholder="Search all notes" aria-label="Search notes" autocomplete="off"></div>
       <div class="scroll"><ul class="note-list" id="note-list"></ul></div>
+      <div class="list-foot">
+        <button class="btn" id="open-folders" type="button"></button>
+        <button class="btn primary" id="new-note-m" type="button" disabled></button>
+      </div>
     </section>
     <section class="pane" id="pane-editor" aria-label="Note">
       <div class="ed-empty" id="ed-empty">
@@ -288,7 +280,7 @@ label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:60
   <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
 <script>
 (function(){
 "use strict";
@@ -298,13 +290,19 @@ var SUPABASE_URL="https://dbicfqyyokyrxusgvpsr.supabase.co";
 var SUPABASE_ANON_KEY="sb_publishable_g1dBQR1-d7YO8Cx0Cv3uCQ_6bIDpWen";
 var supabase=null, currentUser=null, authMode="signin", realtimeChannel=null;
 var QUADS=[
+  {id:"today",name:"Today",hint:"What you plan to do today"},
   {id:"do",name:"Do first",hint:"Urgent and important"},
   {id:"schedule",name:"Schedule",hint:"Important, not urgent"},
   {id:"delegate",name:"Delegate",hint:"Urgent, not important"},
   {id:"eliminate",name:"Eliminate",hint:"Neither"}
 ];
 var QIDS=QUADS.map(function(q){return q.id;});
-var SUGGESTED=["Work","Personal","Ideas","Shopping"];
+var SUGGESTED=["Work","Food","Personal","Ideas","Shopping"];
+var DEFAULT_KW={
+  Work:"meeting, project, deadline, client, report, invoice, email, boss, colleague, office",
+  Food:"recipe, dinner, lunch, breakfast, cook, bake, ingredient, restaurant, soup, pasta, salad, dessert",
+  Shopping:"buy, groceries, shopping, order, pick up, store"
+};
 
 function $(s,r){return (r||document).querySelector(s);}
 function el(tag,props){
@@ -348,21 +346,21 @@ function icon(name,size){
 }
 function newId(p){return p+"-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function isMobile(){return window.matchMedia("(max-width: 820px)").matches;}
-function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
 
 /* ---------- state ---------- */
 var items=new Map();          // id -> {kind, ...}
-var ui={view:"board",folder:"all",noteId:null,pane:"folders",query:"",lastQuad:"do"};
+var ui={view:"board",folder:"all",noteId:null,pane:"list",query:"",lastQuad:"do"};
 var mode="connecting";        // connecting | db | local
-var col=null, loaded=false, confirmed=false, hasPending=false;
-var inflight=0, writeError=null, connectTimer=null, bannerKind=null;
-var pending=new Map(), chains=new Map(), timers=new Map();
+var loaded=false, confirmed=false, hasPending=false;
+var inflight=0, writeError=null, bannerKind=null;
+var pending=new Map(), timers=new Map();
 
 /* ---------- sync status ---------- */
 function setSync(k){
   var s=$("#sync");
   s.dataset.s=k;
-  s.textContent=({ok:"Synced",busy:"Saving…",wait:"Connecting…",local:"This device only",err:"Not saved"})[k];
+  var label=({ok:"Synced",busy:"Saving…",wait:"Connecting…",local:"This device only",err:"Not saved"})[k];
+  s.title=label; s.setAttribute("aria-label",label);
 }
 function updateSync(){
   if(mode==="local") return setSync("local");
@@ -372,12 +370,6 @@ function updateSync(){
 }
 function showBanner(text,kind){bannerKind=kind||null;var b=$("#banner");b.textContent=text;b.hidden=false;}
 function hideBanner(kind){if(kind&&bannerKind!==kind) return;bannerKind=null;$("#banner").hidden=true;}
-function errText(e){
-  var c=e&&e.code;
-  if(c==="quota_exceeded") return "This page's storage is full, so the last change was not saved. Delete some items to keep saving.";
-  if(c==="revoked") return "Access to your saved data was withdrawn. Reopen the page from your Claude artifacts to reconnect.";
-  return "The last change could not be saved. It is still on screen. Edit it again to retry.";
-}
 
 /* ---------- persistence ---------- */
 function persist(id){
@@ -392,14 +384,14 @@ async function writeOne(id){
   pending.set(id,(pending.get(id)||0)+1);
   inflight++; updateSync();
   try{
+    var result;
     if(items.has(id)){
       var row={id:id,user_id:currentUser.id,data:items.get(id),updated_at:new Date().toISOString()};
-      var result=await supabase.from("focus_items").upsert(row,{onConflict:"user_id,id"});
-      if(result.error) throw result.error;
+      result=await supabase.from("focus_items").upsert(row,{onConflict:"user_id,id"});
     }else{
-      var result=await supabase.from("focus_items").delete().eq("user_id",currentUser.id).eq("id",id);
-      if(result.error) throw result.error;
+      result=await supabase.from("focus_items").delete().eq("user_id",currentUser.id).eq("id",id);
     }
+    if(result.error) throw result.error;
     if(writeError){writeError=null;hideBanner("write");}
   }catch(e){
     writeError=e; showBanner("Could not save to your cloud account: "+(e.message||"Please try again."),"write");
@@ -421,36 +413,101 @@ function flushNote(id){
 }
 function flushAll(){Array.from(timers.keys()).forEach(flushNote);}
 
-function authMessage(msg,isError){
-  var n=$("#auth-message"); n.textContent=msg||"";
-  n.style.color=isError?"var(--danger)":"var(--muted)";
+/* ---------- account (small button in the top bar, details in a dialog) ---------- */
+function renderAcct(){
+  var b=$("#acct");
+  b.hidden=false;
+  if(currentUser){
+    var email=currentUser.email||"Account";
+    b.className="avatar";
+    b.textContent=email.charAt(0).toUpperCase();
+    b.setAttribute("aria-label","Account: "+email);
+    b.title=email;
+  }else{
+    b.className="btn small";
+    b.textContent="Sign in";
+    b.setAttribute("aria-label","Sign in to sync across devices");
+    b.removeAttribute("title");
+  }
 }
-function setAuthFormMode(next){
-  authMode=next;
-  $("#auth-heading").textContent=next==="signup"?"Create an account to sync your data":"Sign in to sync across devices";
-  $("#auth-submit").textContent=next==="signup"?"Create account":"Sign in";
-  $("#auth-toggle").textContent=next==="signup"?"I already have an account":"Create account";
-  $("#auth-password").autocomplete=next==="signup"?"new-password":"current-password";
-  authMessage("");
+function buildAccount(box,message,isError){
+  box.textContent="";
+  if(currentUser){
+    var out=el("button",{class:"btn danger",type:"button",text:"Sign out",onclick:async function(){
+      flushAll();
+      var r=await supabase.auth.signOut();
+      if(r.error){note.textContent=r.error.message;return;}
+      closeSheet(); showSignedOut();
+    }});
+    var note=el("p",{class:"err",role:"alert"});
+    box.append(
+      el("h2",{id:"sheet-title",text:"Account"}),
+      el("p",{class:"note",text:"Signed in as "+(currentUser.email||"your account")+". Your tasks and notes sync across your devices."}),
+      note,
+      el("div",{class:"row"},el("span",{class:"spacer"}),
+        el("button",{class:"btn",type:"button",text:"Close",onclick:closeSheet}),out));
+    return;
+  }
+  var signup=authMode==="signup";
+  var email=el("input",{id:"auth-email",type:"email",autocomplete:"email",placeholder:"you@example.com",required:true});
+  var pass=el("input",{id:"auth-password",type:"password",autocomplete:signup?"new-password":"current-password",placeholder:"At least 6 characters",minlength:"6",required:true});
+  var msg=el("div",{class:isError?"err":"note",role:"status",text:message||""});
+  var submit=el("button",{class:"btn primary",type:"submit",text:signup?"Create account":"Sign in"});
+  var form=el("form",{onsubmit:async function(e){
+    e.preventDefault();
+    if(!supabase){msg.className="err";msg.textContent="The cloud connection is not ready yet.";return;}
+    submit.disabled=true; msg.className="note"; msg.textContent=signup?"Creating your account…":"Signing in…";
+    try{
+      if(signup){
+        var created=await supabase.auth.signUp({email:email.value.trim(),password:pass.value});
+        if(created.error) throw created.error;
+        if(created.data.session){closeSheet();}
+        else{authMode="signin";buildAccount(box,"Account created. Check your email for a confirmation link, then sign in.");}
+      }else{
+        var signed=await supabase.auth.signInWithPassword({email:email.value.trim(),password:pass.value});
+        if(signed.error) throw signed.error;
+        closeSheet();
+      }
+    }catch(err){
+      msg.className="err"; msg.textContent=err.message||"Sign-in failed.";
+      submit.disabled=false;
+    }
+  }},
+    el("label",{class:"f"},"Email",email),
+    el("label",{class:"f"},"Password",pass),
+    msg,
+    el("div",{class:"row"},
+      el("button",{class:"btn",type:"button",text:signup?"I already have an account":"Create account",onclick:function(){
+        authMode=signup?"signin":"signup"; buildAccount(box);
+        var f=$("#auth-email"); if(f) f.focus();
+      }}),
+      el("span",{class:"spacer"}),
+      submit));
+  box.append(
+    el("h2",{id:"sheet-title",text:signup?"Create an account":"Sign in"}),
+    el("p",{class:"note",text:"Sign in to sync your tasks and notes across devices. Until then they stay in this browser."}),
+    form);
 }
+function openAccount(){
+  openSheet(function(box){buildAccount(box);});
+  var f=$("#auth-email"); if(f) f.focus();
+}
+
 function showSignedOut(){
-  currentUser=null; mode="local"; loaded=true; confirmed=false;
-  if(realtimeChannel){supabase.removeChannel(realtimeChannel);realtimeChannel=null;}
-  $("#auth-form").hidden=false; $("#auth-signed-in").hidden=true;
-  $("#authbar").hidden=false;
+  currentUser=null; mode="local"; loaded=true; confirmed=false; hasPending=false;
+  if(realtimeChannel&&supabase){supabase.removeChannel(realtimeChannel);realtimeChannel=null;}
   setSync("local");
   try{
     var raw=localStorage.getItem(LS_ITEMS);
     items=raw?new Map(Object.entries(JSON.parse(raw))):new Map();
   }catch(e){items=new Map();}
-  showBanner("You're not signed in. Changes are saved only in this browser until you sign in.","conn");
-  fixUi(); applyReady(); renderAll();
+  hideBanner("conn");
+  renderAcct(); fixUi(); applyReady(); renderAll();
 }
 async function startDb(user){
+  if(mode==="db"&&currentUser&&currentUser.id===user.id) return;
   currentUser=user; mode="db"; loaded=false; confirmed=false; writeError=null;
-  $("#auth-form").hidden=true; $("#auth-signed-in").hidden=false;
-  $("#auth-email-label").textContent=user.email||"Signed in";
-  authMessage("");
+  renderAcct();
   setSync("wait");
   var result=await supabase.from("focus_items").select("id,data").eq("user_id",user.id);
   if(result.error){
@@ -503,7 +560,7 @@ async function init(){
   setView(v==="notes"||v==="board"?v:(saved==="notes"?"notes":"board"),{updateHash:false});
   renderAll();
   if(!window.supabase||!window.supabase.createClient){
-    showSignedOut(); authMessage("Could not load the Supabase connection library. Check your internet connection.",true); return;
+    showSignedOut(); showBanner("Could not load the sync library. Check your internet connection. Changes are kept in this browser.","conn"); return;
   }
   supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
   supabase.auth.onAuthStateChange(function(event,session){
@@ -515,48 +572,13 @@ async function init(){
     }
   });
   var sessionResult=await supabase.auth.getSession();
-  if(sessionResult.error){showSignedOut();authMessage(sessionResult.error.message,true);return;}
+  if(sessionResult.error){showSignedOut();showBanner(sessionResult.error.message,"conn");return;}
   if(sessionResult.data.session&&sessionResult.data.session.user){
     await startDb(sessionResult.data.session.user);
   }else{
     showSignedOut();
   }
 }
-
-/* ---------- account controls ---------- */
-$("#auth-toggle").addEventListener("click",function(){
-  setAuthFormMode(authMode==="signin"?"signup":"signin");
-});
-$("#auth-form").addEventListener("submit",async function(e){
-  e.preventDefault();
-  if(!supabase){authMessage("The cloud connection is not ready yet.",true);return;}
-  var email=$("#auth-email").value.trim(), password=$("#auth-password").value;
-  var submit=$("#auth-submit"); submit.disabled=true; authMessage(authMode==="signup"?"Creating your account…":"Signing in…");
-  try{
-    if(authMode==="signup"){
-      var created=await supabase.auth.signUp({email:email,password:password});
-      if(created.error) throw created.error;
-      if(created.data.session){
-        authMessage("Account created. Connecting your cloud data…");
-        await startDb(created.data.user);
-      }else{
-        authMessage("Account created. Check your email for a confirmation link, then return here and sign in.");
-        setAuthFormMode("signin");
-      }
-    }else{
-      var signed=await supabase.auth.signInWithPassword({email:email,password:password});
-      if(signed.error) throw signed.error;
-      if(signed.data.user) await startDb(signed.data.user);
-    }
-  }catch(err){authMessage(err.message||"Sign-in failed.",true);}
-  finally{submit.disabled=false;}
-});
-$("#auth-signout").addEventListener("click",async function(){
-  flushAll();
-  var out=await supabase.auth.signOut();
-  if(out.error) authMessage(out.error.message,true);
-  else showSignedOut();
-});
 
 /* ---------- selectors ---------- */
 function allTasks(){
@@ -742,10 +764,36 @@ function renderBoard(){
 }
 
 /* ---------- notes ---------- */
-function addFolder(name){
+function addFolder(name,keywords){
   var id=newId("f");
-  items.set(id,{kind:"folder",name:name,createdAt:Date.now()});
+  items.set(id,{kind:"folder",name:name,keywords:keywords||"",createdAt:Date.now()});
   persist(id); return id;
+}
+/* Auto-sort: an unfiled note moves to the folder whose words it matches most.
+   Words match at the start of a word, so "cook" also catches "cooking". A folder you pick by hand is never changed. */
+function kwList(f){return String(f.keywords||"").split(",").map(function(s){return s.trim().toLowerCase();}).filter(Boolean);}
+function escRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");}
+function bestFolder(body){
+  var best=null, bestScore=0;
+  allFolders().forEach(function(f){
+    var score=0;
+    kwList(items.get(f.id)).forEach(function(k){
+      if(new RegExp("(^|[^\\p{L}\\p{N}])"+escRe(k),"iu").test(body)) score++;
+    });
+    if(score>bestScore){best=f.id;bestScore=score;}
+  });
+  return best;
+}
+function autoFile(id){
+  var n=items.get(id);
+  if(!n||n.kind!=="note"||n.manual||folderOk(n.folderId)) return false;
+  var fid=bestFolder(String(n.body||""));
+  if(!fid) return false;
+  items.set(id,Object.assign({},n,{folderId:fid,autoFiled:true}));
+  persist(id); return true;
+}
+function sortUnfiled(){
+  allNotes().forEach(function(n){if(n.body.trim()) autoFile(n.id);});
 }
 function deleteFolder(id){
   items.forEach(function(v,nid){
@@ -759,6 +807,8 @@ function openFolderSheet(id){
   openSheet(function(box){
     var name=el("input",{id:"fs-name",type:"text",maxlength:"40",placeholder:"For example: Work",autocomplete:"off"});
     name.value=f?f.name:"";
+    var kw=el("input",{id:"fs-kw",type:"text",maxlength:"300",placeholder:"For example: recipe, dinner, cook",autocomplete:"off"});
+    kw.value=f?(f.keywords||""):"";
     var err=el("div",{class:"err",role:"alert"});
     var row=el("div",{class:"row"});
     if(f){
@@ -775,11 +825,19 @@ function openFolderSheet(id){
       if(!v){err.textContent="Enter a folder name.";return;}
       var dupe=allFolders().some(function(x){return x.id!==id&&x.name.toLowerCase()===v.toLowerCase();});
       if(dupe){err.textContent="You already have a folder with that name.";return;}
-      if(f){items.set(id,Object.assign({},f,{name:v}));persist(id);}
-      else{ui.folder=addFolder(v);ui.query="";$("#search").value="";ui.noteId=null;ui.pane="list";}
+      var kv=kw.value.trim();
+      if(!kv&&!f){
+        var known=Object.keys(DEFAULT_KW).filter(function(k){return k.toLowerCase()===v.toLowerCase();})[0];
+        kv=known?DEFAULT_KW[known]:"";
+      }
+      if(f){items.set(id,Object.assign({},f,{name:v,keywords:kv}));persist(id);}
+      else{ui.folder=addFolder(v,kv);ui.query="";$("#search").value="";ui.noteId=null;ui.pane="list";}
+      sortUnfiled();
       closeSheet(); renderAll();
     }},
       el("label",{class:"f"},"Folder name",name),
+      el("label",{class:"f"},"Auto-sort words (optional)",kw),
+      el("p",{class:"note",text:"Unfiled notes containing one of these words move here when you close them. Separate words with commas."}),
       err,
       f?el("p",{class:"note",text:"Deleting a folder keeps its notes. They move to Unfiled."}):null,
       row);
@@ -801,10 +859,14 @@ function selectNote(id){
 }
 function dropIfEmpty(id){
   var n=items.get(id);
-  if(n&&n.kind==="note"&&!String(n.body||"").trim()){
-    var t=timers.get(id); if(t){clearTimeout(t);timers.delete(id);}
-    items.delete(id); persist(id);
-    if(ui.noteId===id) ui.noteId=null;
+  if(n&&n.kind==="note"){
+    if(!String(n.body||"").trim()){
+      var t=timers.get(id); if(t){clearTimeout(t);timers.delete(id);}
+      items.delete(id); persist(id);
+      if(ui.noteId===id) ui.noteId=null;
+    }else{
+      autoFile(id);
+    }
   }
 }
 function createNote(){
@@ -839,7 +901,7 @@ function renderFolders(){
     var chips=el("div",{class:"chips"});
     SUGGESTED.forEach(function(s){
       chips.append(el("button",{class:"chip",type:"button",text:"+ "+s,onclick:function(){
-        ui.folder=addFolder(s); ui.noteId=null; ui.pane="list"; renderAll();
+        ui.folder=addFolder(s,DEFAULT_KW[s]); ui.noteId=null; ui.pane="list"; renderAll();
       }}));
     });
     ul.append(el("li",{class:"empty",text:"Make a folder for each topic to keep notes sorted."}),el("li",{},chips));
@@ -890,7 +952,7 @@ function applyPane(){
 }
 function applyReady(){
   var ready=mode!=="connecting";
-  ["#qa-title","#qa-add","#new-note","#new-folder"].forEach(function(s){$(s).disabled=!ready;});
+  ["#qa-title","#qa-add","#new-note","#new-note-m","#new-folder"].forEach(function(s){$(s).disabled=!ready;});
 }
 function renderAll(){
   renderBoard(); renderFolders(); renderList(); renderEditor(); applyReady(); applyPane();
@@ -915,6 +977,7 @@ window.addEventListener("hashchange",function(){
   var v=location.hash.slice(1);
   if(v==="board"||v==="notes") setView(v,{updateHash:false});
 });
+$("#acct").addEventListener("click",openAccount);
 
 var qsel=$("#qa-quad");
 QUADS.forEach(function(q){qsel.append(el("option",{value:q.id,text:q.name}));});
@@ -941,14 +1004,20 @@ var cd=$("#clear-done");
   });
 })();
 
-$("#new-folder").append(icon("plus"));
-$("#back-folders").append(icon("back"),"Folders");
+$("#new-folder").append(icon("plus",16),"New folder");
+$("#back-notes").append(icon("back"),"Notes");
 $("#back-list").append(icon("back"),"Notes");
+$("#open-folders").append(icon("folder"),"Folders");
+$("#new-note-m").append(icon("plus"),"New note");
 $("#new-folder").addEventListener("click",function(){openFolderSheet(null);});
 $("#new-note").addEventListener("click",createNote);
-$("#back-folders").addEventListener("click",function(){
+$("#new-note-m").addEventListener("click",createNote);
+$("#open-folders").addEventListener("click",function(){
   if(ui.noteId) dropIfEmpty(ui.noteId);
   ui.noteId=null; ui.pane="folders"; renderAll();
+});
+$("#back-notes").addEventListener("click",function(){
+  ui.pane="list"; renderAll();
 });
 $("#back-list").addEventListener("click",function(){
   if(ui.noteId) dropIfEmpty(ui.noteId);
@@ -969,7 +1038,7 @@ $("#note-body").addEventListener("input",function(){
 $("#note-folder").addEventListener("change",function(){
   var id=ui.noteId, n=id&&items.get(id);
   if(!n) return;
-  items.set(id,Object.assign({},n,{folderId:this.value||null}));
+  items.set(id,Object.assign({},n,{folderId:this.value||null,manual:true}));
   persist(id); renderFolders(); renderList();
 });
 $("#pin-note").addEventListener("click",function(){
@@ -991,5 +1060,5 @@ window.addEventListener("pagehide",flushAll);
 init();
 })();
 </script>
-
-</body></html>
+</body>
+</html>
