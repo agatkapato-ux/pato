@@ -10,7 +10,7 @@
    Board is a 2x2 priority matrix. Notes open on the recent-notes list; on phones the list has
    a bottom bar with New note and Folders, and folders / editor are separate full-screen panes. */
 :root{
-  --bg:#edf0f3; --surface:#ffffff; --surface-2:#f3f5f8; --ink:#18212a; --muted:#5d6977; --line:#d8dee5;
+  --bg:#e6d6e0; --surface:#ffffff; --surface-2:#f6eff3; --ink:#18212a; --muted:#6a5c66; --line:#d9c5d2;
   --accent:#8a3f6e; --accent-ink:#ffffff; --accent-soft:#f0dde8;
   --q-do:#b8422f; --q-do-soft:#f8e1dc;
   --q-sch:#2a64ad; --q-sch-soft:#dbe7f6;
@@ -26,7 +26,7 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#0f1418; --surface:#171e25; --surface-2:#1e2730; --ink:#e7ecf1; --muted:#8f9ca9; --line:#2a3540;
+    --bg:#241a22; --surface:#2e222c; --surface-2:#382b36; --ink:#e7ecf1; --muted:#aa9aa5; --line:#493945;
     --accent:#d08ab5; --accent-ink:#2a0f20; --accent-soft:#3a1f30;
     --q-do:#ef8a78; --q-do-soft:#3a201b;
     --q-sch:#7fb0ee; --q-sch-soft:#1b2b40;
@@ -38,7 +38,7 @@
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0f1418; --surface:#171e25; --surface-2:#1e2730; --ink:#e7ecf1; --muted:#8f9ca9; --line:#2a3540;
+  --bg:#241a22; --surface:#2e222c; --surface-2:#382b36; --ink:#e7ecf1; --muted:#aa9aa5; --line:#493945;
   --accent:#d08ab5; --accent-ink:#2a0f20; --accent-soft:#3a1f30;
   --q-do:#ef8a78; --q-do-soft:#3a201b;
   --q-sch:#7fb0ee; --q-sch-soft:#1b2b40;
@@ -68,8 +68,8 @@ button{font:inherit;color:inherit}
 
 /* top bar */
 .top{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;flex:none}
-.tabs{order:-1;flex:1;max-width:300px;display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px}
-.tabs button{flex:1;border:0;background:none;padding:7px 18px;border-radius:999px;font-weight:600;color:var(--muted);cursor:pointer}
+.tabs{order:-1;flex:1 1 200px;min-width:0;max-width:420px;display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px}
+.tabs button{flex:1;min-width:0;white-space:nowrap;border:0;background:none;padding:7px 10px;border-radius:999px;font-weight:600;color:var(--muted);cursor:pointer}
 .tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,30,40,.12)}
 .sync{margin-left:auto;display:flex;align-items:center;padding:6px}
 .sync::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--muted)}
@@ -183,6 +183,63 @@ label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:60
   #new-note{display:none}
 }
 
+.f-item.drop{background:var(--accent-soft);outline:2px dashed var(--accent);outline-offset:-2px}
+.quick.inline{flex-wrap:nowrap}
+.quick.inline input{flex:1 1 auto}
+
+/* shopping lists */
+.shop{display:flex;flex-direction:column;gap:12px;overflow-y:auto;padding-bottom:4px}
+.s-lists{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;flex:none;scrollbar-width:none}
+.s-lists::-webkit-scrollbar{display:none}
+.s-chip{flex:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:600;cursor:pointer}
+.s-chip.active{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.s-chip.add{border-style:dashed;background:none;color:var(--muted)}
+.s-count{font-size:12px;font-variant-numeric:tabular-nums;opacity:.8}
+.s-panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.s-head{display:flex;align-items:center;gap:8px}
+.s-head h2{font:700 18px/1.2 var(--font-display);margin:0;flex:1;min-width:0;overflow-wrap:anywhere}
+.s-items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.s-item{--qc:var(--accent);display:flex;gap:8px;align-items:center;padding:8px 10px 8px 6px;border-radius:10px;background:var(--surface-2)}
+.s-text{flex:1;min-width:0;text-align:left;background:none;border:0;padding:3px 0;cursor:pointer;font-weight:500;overflow-wrap:anywhere}
+.s-item.done .s-text{text-decoration:line-through;color:var(--muted)}
+.s-item.done .check::before{background:var(--qc)}
+.s-item.done .check::after{opacity:1}
+.s-empty{padding:28px 8px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:12px;align-items:center}
+.s-empty .chips{justify-content:center}
+
+/* meal planner */
+.meals{overflow-y:auto}
+.m-wrap{display:flex;flex-direction:column;gap:14px;padding-bottom:4px;max-width:720px}
+.m-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.m-head h2,.m-title{font:700 18px/1.2 var(--font-display);margin:0 auto 0 0}
+.m-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.m-note{color:var(--muted);margin:0}
+.m-meals{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.m-meal{display:flex;gap:10px 12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.m-info{display:flex;flex-direction:column;gap:1px;min-width:0}
+.m-cat{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+.m-name{font-weight:600;font-size:16px;overflow-wrap:anywhere}
+.m-sub{color:var(--muted);font-size:13px}
+a.btn{text-decoration:none;color:inherit}
+.m-shop{border-top:1px solid var(--line);padding-top:10px}
+.m-shop summary{cursor:pointer;font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.m-count{color:var(--muted);font-variant-numeric:tabular-nums}
+.m-shop ul{margin:8px 0 2px;padding-left:20px;display:flex;flex-direction:column;gap:2px;overflow-wrap:anywhere}
+.m-msg{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* search and move dialogs */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.gs-out{display:flex;flex-direction:column;gap:12px}
+.gs-group{display:flex;flex-direction:column;gap:2px}
+.gs-group h3{margin:0 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.gs-row{width:100%;text-align:left;background:none;border:0;border-radius:10px;padding:9px 10px;display:flex;flex-direction:column;gap:2px;cursor:pointer;min-width:0}
+.gs-row:hover{background:var(--surface-2)}
+.gs-main{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gs-main.done{text-decoration:line-through;color:var(--muted)}
+.gs-sub{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pick-list{display:flex;flex-direction:column;gap:8px}
+.pick-list .btn{justify-content:flex-start}
+
 /* sheet */
 .backdrop{position:fixed;inset:0;background:rgba(10,16,22,.55);display:flex;align-items:center;justify-content:center;z-index:50;
   padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
@@ -207,6 +264,22 @@ label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:60
 .qp[data-q="schedule"]{--c:var(--q-sch);--s:var(--q-sch-soft)}
 .qp[data-q="delegate"]{--c:var(--q-del);--s:var(--q-del-soft)}
 .qp[data-q="eliminate"]{--c:var(--q-no);--s:var(--q-no-soft)}
+/* larger text on phones */
+@media(max-width:820px){
+  body{font-size:17px}
+  .top{gap:8px}
+  .tabs button{font-size:15px;padding:7px 4px}
+  .btn.small{font-size:15px;padding:8px 12px}
+  .q-head h2,.pane-head h2,.s-head h2{font-size:19px}
+  .q-hint,.f-count,.n-folder,.ed-meta,.s-count{font-size:14px}
+  .t-desc,.n-sub,.empty,.sheet .note,.err,label.f,.qp small,.board-foot,.chip,.gs-sub{font-size:15px}
+  .t-title,.n-title{font-size:17px}
+  .note-item{padding:13px 10px}
+  #note-body{font-size:18px}
+  .check{width:36px;height:36px}
+  .avatar{width:34px;height:34px}
+  input,textarea,select{font-size:17px}
+}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -215,10 +288,13 @@ label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:60
 <div class="app">
   <header class="top">
     <div class="sync" id="sync" data-s="wait" role="status">Connecting…</div>
-    <button type="button" id="acct" class="btn small" hidden>Sign in</button>
+    <button type="button" id="gsearch" class="icon-btn" aria-label="Search tasks, notes and shopping"></button>
+    <button type="button" id="acct" class="icon-btn" aria-label="Sign in to sync across devices" hidden></button>
     <nav class="tabs" role="tablist" aria-label="Sections">
       <button type="button" role="tab" id="tab-board" data-view="board" aria-selected="true">Board</button>
       <button type="button" role="tab" id="tab-notes" data-view="notes" aria-selected="false">Notes</button>
+      <button type="button" role="tab" id="tab-shop" data-view="shop" aria-selected="false">Shop</button>
+      <button type="button" role="tab" id="tab-meals" data-view="meals" aria-selected="false">Meals</button>
     </nav>
   </header>
   <div class="banner" id="banner" role="status" hidden></div>
@@ -273,6 +349,30 @@ label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:60
         <div class="ed-meta" id="ed-meta"></div>
       </div>
     </section>
+  </section>
+
+  <section class="view shop" id="view-shop" aria-labelledby="tab-shop" hidden>
+    <div class="s-lists" id="shop-lists"></div>
+    <div class="s-empty" id="shop-empty" hidden></div>
+    <div class="s-panel" id="shop-panel" hidden>
+      <div class="s-head">
+        <h2 id="shop-title"></h2>
+        <button class="icon-btn" id="shop-edit" type="button" aria-label="Rename or delete list"></button>
+      </div>
+      <form class="quick inline" id="shop-add" autocomplete="off">
+        <input id="shop-text" type="text" maxlength="120" placeholder="Add an item" aria-label="New item" disabled>
+        <button class="btn primary" id="shop-add-btn" type="submit" disabled>Add</button>
+      </form>
+      <ul class="s-items" id="shop-items"></ul>
+      <div class="board-foot">
+        <span id="shop-stats"></span>
+        <button class="btn small danger" id="shop-clear" type="button" hidden></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="view meals" id="view-meals" aria-labelledby="tab-meals" hidden>
+    <div class="m-wrap" id="meals-body"></div>
   </section>
 </div>
 
@@ -334,7 +434,9 @@ var ICONS={
   trash:'<path d="M4 6h12M8 6V4h4v2M6 6l.7 10h6.6L14 6" stroke-linejoin="round"/>',
   pencil:'<path d="M4 16l1-4 8-8 3 3-8 8-4 1z" stroke-linejoin="round"/>',
   folder:'<path d="M3 6a1 1 0 011-1h4l2 2h6a1 1 0 011 1v7a1 1 0 01-1 1H4a1 1 0 01-1-1V6z" stroke-linejoin="round"/>',
-  all:'<rect x="4" y="3" width="12" height="14" rx="2"/><path d="M7 8h6M7 11h6"/>'
+  all:'<rect x="4" y="3" width="12" height="14" rx="2"/><path d="M7 8h6M7 11h6"/>',
+  search:'<circle cx="9" cy="9" r="5"/><path d="M13 13l4 4"/>',
+  person:'<circle cx="10" cy="7" r="3.2"/><path d="M4 17c.8-3.2 3.2-4.8 6-4.8s5.2 1.6 6 4.8"/>'
 };
 function icon(name,size){
   var s=document.createElement("span");
@@ -349,7 +451,7 @@ function isMobile(){return window.matchMedia("(max-width: 820px)").matches;}
 
 /* ---------- state ---------- */
 var items=new Map();          // id -> {kind, ...}
-var ui={view:"board",folder:"all",noteId:null,pane:"list",query:"",lastQuad:"do"};
+var ui={view:"board",folder:"all",noteId:null,pane:"list",query:"",lastQuad:"do",shopList:null,action:null};
 var mode="connecting";        // connecting | db | local
 var loaded=false, confirmed=false, hasPending=false;
 var inflight=0, writeError=null, bannerKind=null;
@@ -424,10 +526,11 @@ function renderAcct(){
     b.setAttribute("aria-label","Account: "+email);
     b.title=email;
   }else{
-    b.className="btn small";
-    b.textContent="Sign in";
+    b.className="icon-btn";
+    b.textContent="";
+    b.append(icon("person",20));
     b.setAttribute("aria-label","Sign in to sync across devices");
-    b.removeAttribute("title");
+    b.title="Sign in";
   }
 }
 function buildAccount(box,message,isError){
@@ -502,7 +605,7 @@ function showSignedOut(){
     items=raw?new Map(Object.entries(JSON.parse(raw))):new Map();
   }catch(e){items=new Map();}
   hideBanner("conn");
-  renderAcct(); fixUi(); applyReady(); renderAll();
+  renderAcct(); fixUi(); applyReady(); renderAll(); afterReady();
 }
 async function startDb(user){
   if(mode==="db"&&currentUser&&currentUser.id===user.id) return;
@@ -535,7 +638,7 @@ async function startDb(user){
     }
   }catch(e){}
   items=next; loaded=true; confirmed=true; hasPending=false;
-  hideBanner("conn"); fixUi(); applyReady(); renderAll(); updateSync();
+  hideBanner("conn"); fixUi(); applyReady(); renderAll(); updateSync(); afterReady();
   if(realtimeChannel) await supabase.removeChannel(realtimeChannel);
   realtimeChannel=supabase.channel("focus-items-"+user.id)
     .on("postgres_changes",{event:"*",schema:"public",table:"focus_items",filter:"user_id=eq."+user.id},function(payload){
@@ -557,7 +660,9 @@ async function startDb(user){
 async function init(){
   var v=location.hash.slice(1), saved=null;
   try{saved=localStorage.getItem(LS_VIEW);}catch(e){}
-  setView(v==="notes"||v==="board"?v:(saved==="notes"?"notes":"board"),{updateHash:false});
+  var views=["board","notes","shop","meals"];
+  if(v==="new-note"||v==="new-task") ui.action=v;
+  setView(ui.action==="new-note"?"notes":ui.action==="new-task"?"board":views.indexOf(v)>=0?v:(views.indexOf(saved)>=0?saved:"board"),{updateHash:false});
   renderAll();
   if(!window.supabase||!window.supabase.createClient){
     showSignedOut(); showBanner("Could not load the sync library. Check your internet connection. Changes are kept in this browser.","conn"); return;
@@ -892,6 +997,16 @@ function renderFolders(){
     li.append(el("button",{class:"f-row",type:"button","aria-current":active?"true":null,onclick:function(){selectFolder(id);}},
       icon(ico),el("span",{class:"f-name",text:label}),el("span",{class:"f-count",text:String(count)})));
     if(editable) li.append(el("button",{class:"icon-btn",type:"button","aria-label":"Rename or delete folder "+label,onclick:function(){openFolderSheet(id);}},icon("pencil",16)));
+    if(id!=="all"){
+      var hasNote=function(e){return [].indexOf.call(e.dataTransfer.types,"application/x-note")>=0;};
+      li.addEventListener("dragover",function(e){if(hasNote(e)){e.preventDefault();e.dataTransfer.dropEffect="move";li.classList.add("drop");}});
+      li.addEventListener("dragleave",function(e){if(!li.contains(e.relatedTarget)) li.classList.remove("drop");});
+      li.addEventListener("drop",function(e){
+        li.classList.remove("drop");
+        var nid=e.dataTransfer.getData("application/x-note");
+        if(nid){e.preventDefault();moveNote(nid,id==="unfiled"?null:id);}
+      });
+    }
     ul.append(li);
   }
   row("all","All notes",notes.length,"all",false);
@@ -919,10 +1034,31 @@ function renderList(){
   }
   list.forEach(function(n){
     var fo=showFolder&&folderOk(n.folderId)?items.get(n.folderId).name:null;
-    var btn=el("button",{class:"note-item"+(n.id===ui.noteId?" active":""),type:"button","aria-current":n.id===ui.noteId?"true":null,onclick:function(){selectNote(n.id);}},
+    var btn=el("button",{class:"note-item"+(n.id===ui.noteId?" active":""),type:"button",draggable:canHover?"true":null,"aria-current":n.id===ui.noteId?"true":null,onclick:function(){
+        if(suppressNoteClick){suppressNoteClick=false;return;}
+        selectNote(n.id);
+      }},
       el("span",{class:"n-title"},n.pinned?icon("pin",14):null,el("span",{class:"t",text:noteTitle(n)})),
       el("span",{class:"n-sub"},el("span",{class:"n-date",text:fmtShort(n.updatedAt)}),el("span",{class:"n-prev",text:notePreview(n)})),
       fo?el("span",{class:"n-folder"},icon("folder",12),fo):null);
+    btn.addEventListener("dragstart",function(e){
+      e.dataTransfer.setData("application/x-note",n.id);
+      e.dataTransfer.setData("text/plain","");
+      e.dataTransfer.effectAllowed="move";
+    });
+    // long press (phone) or right click opens "Move note to"
+    var lp=null;
+    btn.addEventListener("touchstart",function(){
+      clearTimeout(lp);
+      lp=setTimeout(function(){
+        suppressNoteClick=true; setTimeout(function(){suppressNoteClick=false;},1200);
+        openMoveSheet(n.id);
+      },550);
+    },{passive:true});
+    ["touchend","touchmove","touchcancel"].forEach(function(t){
+      btn.addEventListener(t,function(){clearTimeout(lp);},{passive:true});
+    });
+    btn.addEventListener("contextmenu",function(e){e.preventDefault();openMoveSheet(n.id);});
     ul.append(el("li",{},btn));
   });
 }
@@ -952,10 +1088,383 @@ function applyPane(){
 }
 function applyReady(){
   var ready=mode!=="connecting";
-  ["#qa-title","#qa-add","#new-note","#new-note-m","#new-folder"].forEach(function(s){$(s).disabled=!ready;});
+  ["#qa-title","#qa-add","#new-note","#new-note-m","#new-folder","#shop-text","#shop-add-btn"].forEach(function(s){$(s).disabled=!ready;});
 }
 function renderAll(){
-  renderBoard(); renderFolders(); renderList(); renderEditor(); applyReady(); applyPane();
+  renderBoard(); renderFolders(); renderList(); renderEditor(); renderShop(); renderMeals(); applyReady(); applyPane();
+}
+
+/* ---------- moving notes to folders ---------- */
+var canHover=window.matchMedia("(hover: hover)").matches;
+var suppressNoteClick=false;
+function moveNote(id,fid){
+  var n=items.get(id); if(!n||n.kind!=="note") return;
+  items.set(id,Object.assign({},n,{folderId:fid||null,manual:true}));
+  persist(id); renderFolders(); renderList(); renderEditor();
+}
+function openMoveSheet(id){
+  var n=items.get(id); if(!n) return;
+  openSheet(function(box){
+    var cur=folderOk(n.folderId)?n.folderId:null;
+    var list=el("div",{class:"pick-list"});
+    function opt(label,fid){
+      list.append(el("button",{class:"btn"+(fid===cur?" primary":""),type:"button",text:label,onclick:function(){moveNote(id,fid);closeSheet();}}));
+    }
+    opt("Unfiled",null);
+    allFolders().forEach(function(f){opt(f.name,f.id);});
+    box.append(el("h2",{id:"sheet-title",text:"Move note to"}),list,
+      el("div",{class:"row"},el("span",{class:"spacer"}),el("button",{class:"btn",type:"button",text:"Cancel",onclick:closeSheet})));
+  });
+}
+
+/* ---------- quick capture (links ending in #new-note or #new-task) ---------- */
+function runAction(){
+  var a=ui.action;
+  if(!a||mode==="connecting"||!loaded) return;
+  ui.action=null;
+  try{history.replaceState(null,"","#"+(a==="new-note"?"notes":"board"));}catch(e){}
+  if(a==="new-note"){setView("notes",{updateHash:false});ui.folder="all";createNote();}
+  else{setView("board",{updateHash:false});var i=$("#qa-title");if(i) i.focus();}
+}
+
+/* ---------- shopping lists ---------- */
+var SHOP_SUGGESTED=["Groceries","Pharmacy","Home"];
+function allShopLists(){
+  var out=[];
+  items.forEach(function(v,id){if(v.kind==="shoplist") out.push({id:id,name:String(v.name||"List"),createdAt:v.createdAt||0});});
+  return out.sort(function(a,b){return a.createdAt-b.createdAt;});
+}
+function shopItems(lid){
+  var out=[];
+  items.forEach(function(v,id){
+    if(v.kind==="shopitem"&&v.listId===lid) out.push(Object.assign({},v,{id:id,text:String(v.text||"")}));
+  });
+  return out.sort(function(a,b){return ((a.done?1:0)-(b.done?1:0))||((a.createdAt||0)-(b.createdAt||0));});
+}
+function currentShopList(){
+  var ls=allShopLists();
+  if(!ls.length) return null;
+  return ls.filter(function(x){return x.id===ui.shopList;})[0]||ls[0];
+}
+function addShopList(name){
+  var id=newId("s");
+  items.set(id,{kind:"shoplist",name:name,createdAt:Date.now()});
+  persist(id); ui.shopList=id; return id;
+}
+function addShopItem(lid,text){
+  var id=newId("b"), now=Date.now();
+  items.set(id,{kind:"shopitem",listId:lid,text:text,done:false,createdAt:now,updatedAt:now});
+  persist(id);
+}
+function toggleShopItem(id){
+  var t=items.get(id); if(!t) return;
+  items.set(id,Object.assign({},t,{done:!t.done,updatedAt:Date.now()}));
+  persist(id); renderShop();
+}
+function openShopListSheet(id){
+  var l=id?items.get(id):null;
+  openSheet(function(box){
+    var name=el("input",{id:"sl-name",type:"text",maxlength:"40",placeholder:"For example: Groceries",autocomplete:"off"});
+    name.value=l?l.name:"";
+    var err=el("div",{class:"err",role:"alert"});
+    var row=el("div",{class:"row"});
+    if(l){
+      var del=el("button",{class:"btn danger",type:"button"});
+      armBtn(del,"Delete list","Tap again to delete",function(){
+        items.forEach(function(v,iid){if(v.kind==="shopitem"&&v.listId===id){items.delete(iid);persist(iid);}});
+        items.delete(id); persist(id);
+        if(ui.shopList===id) ui.shopList=null;
+        closeSheet(); renderShop();
+      });
+      row.append(del);
+    }
+    row.append(el("span",{class:"spacer"}),
+      el("button",{class:"btn",type:"button",text:"Cancel",onclick:closeSheet}),
+      el("button",{class:"btn primary",type:"submit",text:l?"Save":"Create"}));
+    var form=el("form",{onsubmit:function(e){
+      e.preventDefault();
+      var v=name.value.trim();
+      if(!v){err.textContent="Enter a list name.";return;}
+      var dupe=allShopLists().some(function(x){return x.id!==id&&x.name.toLowerCase()===v.toLowerCase();});
+      if(dupe){err.textContent="You already have a list with that name.";return;}
+      if(l){items.set(id,Object.assign({},l,{name:v}));persist(id);}
+      else addShopList(v);
+      closeSheet(); renderShop();
+    }},
+      el("label",{class:"f"},"List name",name),
+      err,
+      l?el("p",{class:"note",text:"Deleting a list also deletes the items on it."}):null,
+      row);
+    box.append(el("h2",{id:"sheet-title",text:l?"Edit list":"New shopping list"}),form);
+  });
+}
+function openShopItemSheet(id){
+  var t=items.get(id); if(!t) return;
+  openSheet(function(box){
+    var text=el("input",{id:"si-text",type:"text",maxlength:"120",autocomplete:"off"});
+    text.value=t.text||"";
+    var err=el("div",{class:"err",role:"alert"});
+    var del=el("button",{class:"btn danger",type:"button"});
+    armBtn(del,"Delete item","Tap again to delete",function(){
+      items.delete(id); persist(id); closeSheet(); renderShop();
+    });
+    var form=el("form",{onsubmit:function(e){
+      e.preventDefault();
+      var v=text.value.trim();
+      if(!v){err.textContent="Enter the item name.";return;}
+      items.set(id,Object.assign({},t,{text:v,updatedAt:Date.now()}));
+      persist(id); closeSheet(); renderShop();
+    }},
+      el("label",{class:"f"},"Item",text),
+      err,
+      el("div",{class:"row"},del,el("span",{class:"spacer"}),
+        el("button",{class:"btn",type:"button",text:"Cancel",onclick:closeSheet}),
+        el("button",{class:"btn primary",type:"submit",text:"Save"})));
+    box.append(el("h2",{id:"sheet-title",text:"Edit item"}),form);
+  });
+}
+function renderShop(){
+  var lists=allShopLists(), cur=currentShopList();
+  ui.shopList=cur?cur.id:null;
+  var chips=$("#shop-lists"); chips.textContent="";
+  lists.forEach(function(l){
+    var open=shopItems(l.id).filter(function(d){return !d.done;}).length;
+    var on=cur&&l.id===cur.id;
+    chips.append(el("button",{class:"s-chip"+(on?" active":""),type:"button","aria-pressed":String(!!on),onclick:function(){ui.shopList=l.id;renderShop();}},
+      l.name,el("span",{class:"s-count",text:String(open)})));
+  });
+  if(lists.length) chips.append(el("button",{class:"s-chip add",type:"button",onclick:function(){openShopListSheet(null);}},icon("plus",14),"New list"));
+  chips.hidden=!lists.length;
+  var empty=$("#shop-empty"); empty.hidden=!!cur; empty.textContent="";
+  if(!cur){
+    empty.append(el("span",{text:loaded?"Make a list for each place you shop.":"Loading…"}));
+    if(loaded){
+      var row=el("div",{class:"chips"});
+      SHOP_SUGGESTED.forEach(function(s){
+        row.append(el("button",{class:"chip",type:"button",text:"+ "+s,onclick:function(){addShopList(s);renderShop();}}));
+      });
+      row.append(el("button",{class:"chip",type:"button",text:"+ Other",onclick:function(){openShopListSheet(null);}}));
+      empty.append(row);
+    }
+  }
+  $("#shop-panel").hidden=!cur;
+  if(!cur) return;
+  $("#shop-title").textContent=cur.name;
+  var list=shopItems(cur.id), ul=$("#shop-items"); ul.textContent="";
+  if(!list.length) ul.append(el("li",{class:"empty",text:"Nothing to buy. Add your first item above."}));
+  list.forEach(function(d){
+    ul.append(el("li",{class:"s-item"+(d.done?" done":"")},
+      el("button",{class:"check",type:"button","aria-label":(d.done?"Mark not bought: ":"Mark bought: ")+d.text,"aria-pressed":String(!!d.done),onclick:function(){toggleShopItem(d.id);}}),
+      el("button",{class:"s-text",type:"button",text:d.text,onclick:function(){openShopItemSheet(d.id);}})));
+  });
+  var done=list.filter(function(d){return d.done;}).length;
+  $("#shop-stats").textContent=list.length?((list.length-done)+" to buy, "+done+" bought"):"";
+  $("#shop-clear").hidden=!done;
+}
+$("#shop-edit").append(icon("pencil",18));
+$("#shop-edit").addEventListener("click",function(){if(ui.shopList) openShopListSheet(ui.shopList);});
+$("#shop-add").addEventListener("submit",function(e){
+  e.preventDefault();
+  var inp=$("#shop-text"), v=inp.value.trim();
+  if(!v||!ui.shopList||mode==="connecting") return;
+  addShopItem(ui.shopList,v);
+  inp.value=""; inp.focus(); renderShop();
+});
+armBtn($("#shop-clear"),"Clear bought","Tap again to clear",function(){
+  var lid=ui.shopList; if(!lid) return;
+  shopItems(lid).forEach(function(d){if(d.done){items.delete(d.id);persist(d.id);}});
+  renderShop();
+});
+
+/* ---------- search across tasks, notes and shopping ---------- */
+function openSearch(){
+  openSheet(function(box){
+    var inp=el("input",{id:"gs-input",type:"search",placeholder:"Search tasks, notes and shopping",autocomplete:"off","aria-label":"Search everything"});
+    var out=el("div",{class:"gs-out"});
+    function group(title,rows){
+      if(!rows.length) return;
+      out.append(el("div",{class:"gs-group"},el("h3",{text:title}),rows));
+    }
+    function row(main,sub,done,go){
+      return el("button",{class:"gs-row",type:"button",onclick:function(){closeSheet();go();}},
+        el("span",{class:"gs-main"+(done?" done":""),text:main}),
+        sub?el("span",{class:"gs-sub",text:sub}):null);
+    }
+    function draw(){
+      var q=inp.value.trim().toLowerCase(); out.textContent="";
+      if(!q){out.append(el("p",{class:"note",text:"Type to search your tasks, notes and shopping lists."}));return;}
+      var quadName={}; QUADS.forEach(function(x){quadName[x.id]=x.name;});
+      var tasks=allTasks().filter(function(t){return (t.title+" "+t.desc).toLowerCase().indexOf(q)>=0;}).slice(0,8);
+      var notes=allNotes().filter(function(n){return n.body.toLowerCase().indexOf(q)>=0;})
+        .sort(function(a,b){return b.updatedAt-a.updatedAt;}).slice(0,8);
+      var buys=[];
+      items.forEach(function(v,id){
+        if(v.kind==="shopitem"&&String(v.text||"").toLowerCase().indexOf(q)>=0) buys.push(Object.assign({},v,{id:id}));
+      });
+      buys=buys.slice(0,8);
+      group("Tasks",tasks.map(function(t){
+        return row(t.title,quadName[t.q]+(t.done?" · done":""),t.done,function(){setView("board");openTask(t.id);});
+      }));
+      group("Notes",notes.map(function(n){
+        var fo=folderOk(n.folderId)?items.get(n.folderId).name:"Unfiled";
+        return row(noteTitle(n),fo+" · "+fmtShort(n.updatedAt),false,function(){
+          setView("notes"); ui.folder="all"; ui.query=""; $("#search").value="";
+          selectNote(n.id); renderFolders();
+        });
+      }));
+      group("Shopping",buys.map(function(b){
+        var l=items.get(b.listId);
+        return row(b.text,(l?l.name:"List")+(b.done?" · bought":""),b.done,function(){
+          ui.shopList=b.listId; setView("shop"); renderShop();
+        });
+      }));
+      if(!tasks.length&&!notes.length&&!buys.length) out.append(el("p",{class:"note",text:"No matches."}));
+    }
+    inp.addEventListener("input",draw);
+    box.append(el("h2",{id:"sheet-title",class:"sr",text:"Search"}),inp,out);
+    draw();
+    setTimeout(function(){inp.focus();},0);
+  });
+}
+$("#gsearch").append(icon("search",20));
+$("#gsearch").addEventListener("click",openSearch);
+
+/* ---------- meal planner (reads the Apps Script web app) ---------- */
+var LS_MEALS="focus-board-meals-v1";
+var mealsState={data:null,error:"",loading:false,at:0,note:""};
+try{var cachedMeals=localStorage.getItem(LS_MEALS); if(cachedMeals) mealsState.data=JSON.parse(cachedMeals);}catch(e){}
+function afterReady(){
+  runAction();
+  if(ui.view==="meals") maybeLoadMeals();
+}
+function plannerUrl(){
+  var s=items.get("set-planner");
+  return s&&s.kind==="setting"?String(s.url||""):"";
+}
+function savePlannerUrl(v){
+  if(v) items.set("set-planner",{kind:"setting",name:"planner",url:v});
+  else items.delete("set-planner");
+  persist("set-planner");
+  mealsState.at=0; mealsState.error=""; mealsState.note="";
+  renderMeals();
+  if(v) loadMeals();
+}
+function openPlannerSheet(){
+  openSheet(function(box){
+    var url=el("input",{id:"pl-url",type:"text",autocomplete:"off",autocapitalize:"off",placeholder:"https://script.google.com/macros/s/…/exec?token=…"});
+    url.value=plannerUrl();
+    var err=el("div",{class:"err",role:"alert"});
+    var row=el("div",{class:"row"});
+    if(plannerUrl()){
+      var del=el("button",{class:"btn danger",type:"button"});
+      armBtn(del,"Disconnect","Tap again to disconnect",function(){savePlannerUrl("");closeSheet();});
+      row.append(del);
+    }
+    row.append(el("span",{class:"spacer"}),
+      el("button",{class:"btn",type:"button",text:"Cancel",onclick:closeSheet}),
+      el("button",{class:"btn primary",type:"submit",text:"Save"}));
+    var form=el("form",{onsubmit:function(e){
+      e.preventDefault();
+      var v=url.value.trim();
+      if(!/^https:\/\//i.test(v)){err.textContent="Paste the full link, starting with https://";return;}
+      savePlannerUrl(v); closeSheet();
+    }},
+      el("label",{class:"f"},"Meal planner link",url),
+      el("p",{class:"note",text:"The web app link from your meal planner script, ending in ?token= and your token."}),
+      err,row);
+    box.append(el("h2",{id:"sheet-title",text:"Meal planner link"}),form);
+  });
+}
+async function loadMeals(){
+  var url=plannerUrl(); if(!url||mealsState.loading) return;
+  mealsState.loading=true; mealsState.error=""; mealsState.note=""; renderMeals();
+  try{
+    var res=await fetch(url,{cache:"no-store"});
+    var data=await res.json();
+    if(data&&data.error) throw new Error(data.error);
+    mealsState.data=data; mealsState.at=Date.now();
+    try{localStorage.setItem(LS_MEALS,JSON.stringify(data));}catch(e){}
+  }catch(e){
+    mealsState.error="Could not load the meal plan. Check the link, and that the web app is shared with “Anyone”. ("+(e&&e.message?e.message:"network error")+")";
+  }
+  mealsState.loading=false; renderMeals();
+}
+function maybeLoadMeals(){
+  if(plannerUrl()&&!mealsState.loading&&Date.now()-mealsState.at>300000) loadMeals();
+}
+function sendToShopping(){
+  var d=mealsState.data;
+  if(!d||!d.shops||!d.shops.length) return;
+  d.shops.forEach(function(s){
+    var existing=allShopLists().filter(function(l){return l.name.toLowerCase()===String(s.shop).toLowerCase();})[0];
+    var lid=existing?existing.id:addShopList(String(s.shop));
+    // replace the planner's earlier items, keep ticks and anything you added yourself
+    var prevDone={};
+    items.forEach(function(v,id){
+      if(v.kind==="shopitem"&&v.listId===lid&&v.source==="planner"){
+        prevDone[v.text]=!!v.done; items.delete(id); persist(id);
+      }
+    });
+    var now=Date.now();
+    s.items.forEach(function(text,i){
+      var id=newId("b");
+      items.set(id,{kind:"shopitem",listId:lid,text:String(text),done:!!prevDone[text],source:"planner",createdAt:now+i,updatedAt:now});
+      persist(id);
+    });
+  });
+  mealsState.note="Sent "+d.shops.length+" lists to Shop.";
+  renderShop(); renderMeals();
+}
+function renderMeals(){
+  var body=$("#meals-body"); body.textContent="";
+  if(!plannerUrl()){
+    body.append(el("div",{class:"m-card"},
+      el("h2",{class:"m-title",text:"Meal planner"}),
+      el("p",{class:"m-note",text:"Connect your Google Sheets meal planner to see this week's dishes here and send the grocery list to your Shop tab."}),
+      el("div",{},el("button",{class:"btn primary",type:"button",text:"Add planner link",onclick:openPlannerSheet}))));
+    return;
+  }
+  var d=mealsState.data;
+  body.append(el("div",{class:"m-head"},
+    el("h2",{text:d&&d.week?"Week of "+d.week:"This week"}),
+    el("button",{class:"btn small",type:"button",text:mealsState.loading?"Loading…":"Refresh",disabled:mealsState.loading?true:null,onclick:loadMeals}),
+    el("button",{class:"icon-btn",type:"button","aria-label":"Planner link settings",onclick:openPlannerSheet},icon("pencil",18))));
+  if(mealsState.error) body.append(el("div",{class:"banner",role:"alert",text:mealsState.error}));
+  if(!d){
+    if(!mealsState.loading&&!mealsState.error) body.append(el("p",{class:"m-note",text:"Nothing loaded yet."}));
+    return;
+  }
+  if(!d.meals||!d.meals.length){
+    body.append(el("div",{class:"m-card"},el("p",{class:"m-note",text:"No plan found yet. Plan a week in the sheet first."})));
+    return;
+  }
+  var ul=el("ul",{class:"m-meals"});
+  d.meals.forEach(function(m){
+    var safe=/^https?:\/\//i.test(m.link||"");
+    ul.append(el("li",{class:"m-meal"},
+      el("div",{class:"m-info"},
+        el("span",{class:"m-cat",text:m.category||""}),
+        el("span",{class:"m-name",text:m.name||""}),
+        el("span",{class:"m-sub",text:m.portions?m.portions+" portions":""})),
+      safe?el("a",{class:"btn small",href:m.link,target:"_blank",rel:"noopener noreferrer",text:"Open recipe"}):null));
+  });
+  body.append(el("div",{class:"m-card"},ul));
+  if(d.shops&&d.shops.length){
+    var card=el("div",{class:"m-card"});
+    card.append(el("div",{class:"m-head"},
+      el("h2",{text:"Grocery list"}),
+      el("button",{class:"btn primary small",type:"button",text:"Send to Shop",onclick:sendToShopping})));
+    if(mealsState.note){
+      card.append(el("div",{class:"m-msg"},mealsState.note,
+        el("button",{class:"chip",type:"button",text:"Open Shop",onclick:function(){setView("shop");}})));
+    }
+    d.shops.forEach(function(s){
+      card.append(el("details",{class:"m-shop"},
+        el("summary",{},el("span",{text:s.shop}),el("span",{class:"m-count",text:String(s.items.length)})),
+        el("ul",{},s.items.map(function(t){return el("li",{text:t});}))));
+    });
+    body.append(card);
+  }
 }
 
 /* ---------- view switching ---------- */
@@ -964,6 +1473,9 @@ function setView(v,opts){
   ui.view=v;
   $("#view-board").hidden=v!=="board";
   $("#view-notes").hidden=v!=="notes";
+  $("#view-shop").hidden=v!=="shop";
+  $("#view-meals").hidden=v!=="meals";
+  if(v==="meals") maybeLoadMeals();
   [].forEach.call(document.querySelectorAll(".tabs button"),function(b){b.setAttribute("aria-selected",String(b.dataset.view===v));});
   if(!opts||opts.updateHash!==false){try{if(location.hash!=="#"+v) location.hash=v;}catch(e){}}
   try{localStorage.setItem(LS_VIEW,v);}catch(e){}
@@ -975,7 +1487,8 @@ function setView(v,opts){
 });
 window.addEventListener("hashchange",function(){
   var v=location.hash.slice(1);
-  if(v==="board"||v==="notes") setView(v,{updateHash:false});
+  if(v==="board"||v==="notes"||v==="shop"||v==="meals") setView(v,{updateHash:false});
+  else if(v==="new-note"||v==="new-task"){ui.action=v;runAction();}
 });
 $("#acct").addEventListener("click",openAccount);
 
