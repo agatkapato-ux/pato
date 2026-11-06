@@ -1375,19 +1375,83 @@ function openPlannerSheet(){
     box.append(el("h2",{id:"sheet-title",text:"Meal planner link"}),form);
   });
 }
-async function loadMeals(){
-  var url=plannerUrl(); if(!url||mealsState.loading) return;
-  mealsState.loading=true; mealsState.error=""; mealsState.note=""; renderMeals();
-  try{
-    var res=await fetch(url,{cache:"no-store"});
-    var data=await res.json();
-    if(data&&data.error) throw new Error(data.error);
-    mealsState.data=data; mealsState.at=Date.now();
-    try{localStorage.setItem(LS_MEALS,JSON.stringify(data));}catch(e){}
-  }catch(e){
-    mealsState.error="Could not load the meal plan. Check the link, and that the web app is shared with “Anyone”. ("+(e&&e.message?e.message:"network error")+")";
+async function loadMeals() {
+  var url = plannerUrl();
+
+  if (!url || mealsState.loading) return;
+
+  mealsState.loading = true;
+  mealsState.error = "";
+  mealsState.note = "";
+  renderMeals();
+
+  var callbackName = "focusBoardMealCallback_" + Date.now();
+  var script = document.createElement("script");
+  var finished = false;
+  var timeout;
+
+  function cleanup() {
+    if (timeout) clearTimeout(timeout);
+    script.remove();
+
+    try {
+      delete window[callbackName];
+    } catch (e) {
+      window[callbackName] = undefined;
+    }
   }
-  mealsState.loading=false; renderMeals();
+
+  function finishWithError(message) {
+    if (finished) return;
+    finished = true;
+    cleanup();
+
+    mealsState.error = message;
+    mealsState.loading = false;
+    renderMeals();
+  }
+
+  window[callbackName] = function(data) {
+    if (finished) return;
+    finished = true;
+    cleanup();
+
+    if (data && data.error) {
+      mealsState.error = data.error;
+    } else if (!data || !Array.isArray(data.meals) || !Array.isArray(data.shops)) {
+      mealsState.error = "The meal planner returned an unexpected response.";
+    } else {
+      mealsState.data = data;
+      mealsState.at = Date.now();
+
+      try {
+        localStorage.setItem(LS_MEALS, JSON.stringify(data));
+      } catch (e) {}
+    }
+
+    mealsState.loading = false;
+    renderMeals();
+  };
+
+  try {
+    var requestUrl = new URL(url);
+    requestUrl.searchParams.set("callback", callbackName);
+
+    script.src = requestUrl.toString();
+
+    script.onerror = function() {
+      finishWithError("Could not connect to the meal planner. Please check the web app link and deployment.");
+    };
+
+    timeout = setTimeout(function() {
+      finishWithError("The meal planner took too long to respond. Please try again.");
+    }, 15000);
+
+    document.head.appendChild(script);
+
+  } catch (e) {
+    finishWithError("Could not load the meal plan. " + (e.message || "Please check the link."));
+  }
 }
 function maybeLoadMeals(){
   if(plannerUrl()&&!mealsState.loading&&Date.now()-mealsState.at>300000) loadMeals();
