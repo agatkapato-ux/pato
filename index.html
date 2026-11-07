@@ -1561,7 +1561,12 @@ async function loadMeals(){
   mealsState.loading=true; mealsState.error=""; mealsState.note=""; renderMeals();
   try{
     var res=await fetch(url,{cache:"no-store"});
-    var data=await res.json();
+    var txt=(await res.text()).trim();
+    // tolerate a callback wrapper such as name( {...} ) around the data
+    var wrapped=txt.match(/^[\w$.]*\(([\s\S]*)\)\s*;?$/);
+    if(wrapped) txt=wrapped[1].trim();
+    if(txt.charAt(0)==="<") throw new Error("Google returned a web page instead of data. Set the web app access to “Anyone”");
+    var data=JSON.parse(txt);
     if(data&&data.error) throw new Error(data.error);
     mealsState.data=data; mealsState.at=Date.now();
     try{localStorage.setItem(LS_MEALS,JSON.stringify(data));}catch(e){}
