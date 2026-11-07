@@ -200,8 +200,10 @@ label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:60
 .s-head h2{font:700 18px/1.2 var(--font-display);margin:0;flex:1;min-width:0;overflow-wrap:anywhere}
 .s-items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .s-item{--qc:var(--accent);display:flex;gap:8px;align-items:center;padding:8px 10px 8px 6px;border-radius:10px;background:var(--surface-2)}
-.s-text{flex:1;min-width:0;text-align:left;background:none;border:0;padding:3px 0;cursor:pointer;font-weight:500;overflow-wrap:anywhere}
-.s-item.done .s-text{text-decoration:line-through;color:var(--muted)}
+.s-edit{flex:1;min-width:0;background:transparent;border:1px solid transparent;border-radius:8px;padding:6px 8px;font-weight:500}
+.s-edit:hover{border-color:var(--line)}
+.s-edit:focus{background:var(--surface);border-color:var(--accent)}
+.s-item.done .s-edit{text-decoration:line-through;color:var(--muted)}
 .s-item.done .check::before{background:var(--qc)}
 .s-item.done .check::after{opacity:1}
 .s-empty{padding:28px 8px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:12px;align-items:center}
@@ -221,10 +223,10 @@ label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:60
 .m-name{font-weight:600;font-size:16px;overflow-wrap:anywhere}
 .m-sub{color:var(--muted);font-size:13px}
 a.btn{text-decoration:none;color:inherit}
-.m-shop{border-top:1px solid var(--line);padding-top:10px}
-.m-shop summary{cursor:pointer;font-weight:600;display:flex;justify-content:space-between;gap:8px}
-.m-count{color:var(--muted);font-variant-numeric:tabular-nums}
-.m-shop ul{margin:8px 0 2px;padding-left:20px;display:flex;flex-direction:column;gap:2px;overflow-wrap:anywhere}
+.m-shop{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.m-shop-title{margin:0;font:700 16px/1.2 var(--font-display);display:flex;justify-content:space-between;gap:8px}
+.m-count{color:var(--muted);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+.m-shop .quick input{padding:8px 12px}
 .m-msg{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 
 /* search and move dialogs */
@@ -1159,7 +1161,24 @@ function addShopItem(lid,text){
 function toggleShopItem(id){
   var t=items.get(id); if(!t) return;
   items.set(id,Object.assign({},t,{done:!t.done,updatedAt:Date.now()}));
-  persist(id); renderShop();
+  persist(id); renderShop(); renderMeals();
+}
+/* One shopping row, used on the Shop tab and the Meals tab. The text is an input you can overwrite in place. */
+function shopRow(d){
+  var inp=el("input",{class:"s-edit",type:"text",maxlength:"120","aria-label":"Item",value:d.text});
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();inp.blur();}});
+  inp.addEventListener("change",function(){
+    var v=inp.value.trim(), t=items.get(d.id); if(!t) return;
+    if(!v){items.delete(d.id);persist(d.id);renderShop();renderMeals();return;}
+    items.set(d.id,Object.assign({},t,{text:v,updatedAt:Date.now()}));
+    persist(d.id);
+  });
+  return el("li",{class:"s-item"+(d.done?" done":"")},
+    el("button",{class:"check",type:"button","aria-label":(d.done?"Mark not bought: ":"Mark bought: ")+d.text,"aria-pressed":String(!!d.done),onclick:function(){toggleShopItem(d.id);}}),
+    inp,
+    el("button",{class:"icon-btn",type:"button","aria-label":"Delete "+d.text,onclick:function(){
+      items.delete(d.id);persist(d.id);renderShop();renderMeals();
+    }},icon("trash",18)));
 }
 function openShopListSheet(id){
   var l=id?items.get(id):null;
@@ -1252,11 +1271,7 @@ function renderShop(){
   $("#shop-title").textContent=cur.name;
   var list=shopItems(cur.id), ul=$("#shop-items"); ul.textContent="";
   if(!list.length) ul.append(el("li",{class:"empty",text:"Nothing to buy. Add your first item above."}));
-  list.forEach(function(d){
-    ul.append(el("li",{class:"s-item"+(d.done?" done":"")},
-      el("button",{class:"check",type:"button","aria-label":(d.done?"Mark not bought: ":"Mark bought: ")+d.text,"aria-pressed":String(!!d.done),onclick:function(){toggleShopItem(d.id);}}),
-      el("button",{class:"s-text",type:"button",text:d.text,onclick:function(){openShopItemSheet(d.id);}})));
-  });
+  list.forEach(function(d){ul.append(shopRow(d));});
   var done=list.filter(function(d){return d.done;}).length;
   $("#shop-stats").textContent=list.length?((list.length-done)+" to buy, "+done+" bought"):"";
   $("#shop-clear").hidden=!done;
@@ -1335,6 +1350,7 @@ var mealsState={data:null,error:"",loading:false,at:0,note:""};
 try{var cachedMeals=localStorage.getItem(LS_MEALS); if(cachedMeals) mealsState.data=JSON.parse(cachedMeals);}catch(e){}
 function afterReady(){
   runAction();
+  autoImport();
   if(ui.view==="meals") maybeLoadMeals();
 }
 function plannerUrl(){
@@ -1375,90 +1391,38 @@ function openPlannerSheet(){
     box.append(el("h2",{id:"sheet-title",text:"Meal planner link"}),form);
   });
 }
-async function loadMeals() {
-  var url = plannerUrl();
-
-  if (!url || mealsState.loading) return;
-
-  mealsState.loading = true;
-  mealsState.error = "";
-  mealsState.note = "";
-  renderMeals();
-
-  var callbackName = "focusBoardMealCallback_" + Date.now();
-  var script = document.createElement("script");
-  var finished = false;
-  var timeout;
-
-  function cleanup() {
-    if (timeout) clearTimeout(timeout);
-    script.remove();
-
-    try {
-      delete window[callbackName];
-    } catch (e) {
-      window[callbackName] = undefined;
-    }
+async function loadMeals(){
+  var url=plannerUrl(); if(!url||mealsState.loading) return;
+  mealsState.loading=true; mealsState.error=""; mealsState.note=""; renderMeals();
+  try{
+    var res=await fetch(url,{cache:"no-store"});
+    var data=await res.json();
+    if(data&&data.error) throw new Error(data.error);
+    mealsState.data=data; mealsState.at=Date.now();
+    try{localStorage.setItem(LS_MEALS,JSON.stringify(data));}catch(e){}
+    autoImport();
+  }catch(e){
+    mealsState.error="Could not load the meal plan. Check the link, and that the web app is shared with “Anyone”. ("+(e&&e.message?e.message:"network error")+")";
   }
-
-  function finishWithError(message) {
-    if (finished) return;
-    finished = true;
-    cleanup();
-
-    mealsState.error = message;
-    mealsState.loading = false;
-    renderMeals();
-  }
-
-  window[callbackName] = function(data) {
-    if (finished) return;
-    finished = true;
-    cleanup();
-
-    if (data && data.error) {
-      mealsState.error = data.error;
-    } else if (!data || !Array.isArray(data.meals) || !Array.isArray(data.shops)) {
-      mealsState.error = "The meal planner returned an unexpected response.";
-    } else {
-      mealsState.data = data;
-      mealsState.at = Date.now();
-
-      try {
-        localStorage.setItem(LS_MEALS, JSON.stringify(data));
-      } catch (e) {}
-    }
-
-    mealsState.loading = false;
-    renderMeals();
-  };
-
-  try {
-    var requestUrl = new URL(url);
-    requestUrl.searchParams.set("callback", callbackName);
-
-    script.src = requestUrl.toString();
-
-    script.onerror = function() {
-      finishWithError("Could not connect to the meal planner. Please check the web app link and deployment.");
-    };
-
-    timeout = setTimeout(function() {
-      finishWithError("The meal planner took too long to respond. Please try again.");
-    }, 15000);
-
-    document.head.appendChild(script);
-
-  } catch (e) {
-    finishWithError("Could not load the meal plan. " + (e.message || "Please check the link."));
-  }
+  mealsState.loading=false; renderMeals();
 }
 function maybeLoadMeals(){
   if(plannerUrl()&&!mealsState.loading&&Date.now()-mealsState.at>300000) loadMeals();
 }
-function sendToShopping(){
+/* Import the planner's grocery list into the Shop tab once per week.
+   After that the lists are yours to edit; "Reset from planner" brings them back to the sheet's version. */
+function autoImport(){
+  var d=mealsState.data;
+  if(!d||!d.week||!d.shops||!d.shops.length||mode==="connecting"||!loaded) return;
+  var s=items.get("set-planner-week");
+  if(s&&s.week===d.week) return;
+  sendToShopping(true);
+}
+function sendToShopping(auto){
   var d=mealsState.data;
   if(!d||!d.shops||!d.shops.length) return;
+  items.set("set-planner-week",{kind:"setting",name:"planner-week",week:d.week||""});
+  persist("set-planner-week");
   d.shops.forEach(function(s){
     var existing=allShopLists().filter(function(l){return l.name.toLowerCase()===String(s.shop).toLowerCase();})[0];
     var lid=existing?existing.id:addShopList(String(s.shop));
@@ -1476,7 +1440,7 @@ function sendToShopping(){
       persist(id);
     });
   });
-  mealsState.note="Sent "+d.shops.length+" lists to Shop.";
+  mealsState.note=auto===true?"":"Lists reset from the planner.";
   renderShop(); renderMeals();
 }
 function renderMeals(){
@@ -1515,17 +1479,33 @@ function renderMeals(){
   body.append(el("div",{class:"m-card"},ul));
   if(d.shops&&d.shops.length){
     var card=el("div",{class:"m-card"});
-    card.append(el("div",{class:"m-head"},
-      el("h2",{text:"Grocery list"}),
-      el("button",{class:"btn primary small",type:"button",text:"Send to Shop",onclick:sendToShopping})));
-    if(mealsState.note){
-      card.append(el("div",{class:"m-msg"},mealsState.note,
-        el("button",{class:"chip",type:"button",text:"Open Shop",onclick:function(){setView("shop");}})));
-    }
+    var reset=el("button",{class:"btn small danger",type:"button"});
+    armBtn(reset,"Reset from planner","Tap again to reset",function(){sendToShopping();});
+    card.append(el("div",{class:"m-head"},el("h2",{text:"Grocery list"}),reset));
+    card.append(el("p",{class:"m-note",text:"Edit, tick or delete items right here. The same lists are on the Shop tab."}));
+    if(mealsState.note) card.append(el("div",{class:"m-msg",text:mealsState.note}));
     d.shops.forEach(function(s){
-      card.append(el("details",{class:"m-shop"},
-        el("summary",{},el("span",{text:s.shop}),el("span",{class:"m-count",text:String(s.items.length)})),
-        el("ul",{},s.items.map(function(t){return el("li",{text:t});}))));
+      var l=allShopLists().filter(function(x){return x.name.toLowerCase()===String(s.shop).toLowerCase();})[0];
+      var sec=el("section",{class:"m-shop","aria-label":s.shop});
+      if(!l){
+        sec.append(el("h3",{class:"m-shop-title",text:s.shop}),el("p",{class:"m-note",text:"Loading…"}));
+        card.append(sec); return;
+      }
+      var list=shopItems(l.id), open=list.filter(function(x){return !x.done;}).length;
+      sec.append(el("h3",{class:"m-shop-title"},el("span",{text:l.name}),el("span",{class:"m-count",text:open+" to buy"})));
+      var ul=el("ul",{class:"s-items"});
+      list.forEach(function(x){ul.append(shopRow(x));});
+      sec.append(ul);
+      var add=el("input",{type:"text",maxlength:"120",placeholder:"Add to "+l.name,"aria-label":"Add to "+l.name,"data-list":l.id});
+      var form=el("form",{class:"quick inline",autocomplete:"off"},add,el("button",{class:"btn",type:"submit",text:"Add"}));
+      form.addEventListener("submit",function(e){
+        e.preventDefault();
+        var v=add.value.trim(); if(!v) return;
+        addShopItem(l.id,v); renderShop(); renderMeals();
+        var nx=document.querySelector('#meals-body input[data-list="'+l.id+'"]'); if(nx) nx.focus();
+      });
+      sec.append(form);
+      card.append(sec);
     });
     body.append(card);
   }
